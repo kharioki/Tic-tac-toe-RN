@@ -1,17 +1,24 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useEffect, useContext } from 'react'
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { AppContext } from '../navigation/AppProvider'
 
 import Board from '../components/Board'
 import { calculateWinner } from '../utils/helpers'
 
 const GameScreen = () => {
-  const { selectedPlayer } = useContext(AppContext)
-
-  const [gameStarted, setGameStarted] = useState(false)
-  const [boardHistory, setBoardHistory] = useState([Array(9).fill(null)])
-  const [xIsNext, setXIsNext] = useState(null)
-  const [stepNumber, setStepNumber] = useState(0)
+  const {
+    selectedPlayer,
+    gameStarted,
+    setGameStarted,
+    boardHistory,
+    setBoardHistory,
+    xIsNext,
+    setXIsNext,
+    stepNumber,
+    setStepNumber,
+  } = useContext(AppContext)
 
   const winner = calculateWinner(boardHistory[stepNumber])
 
@@ -61,8 +68,10 @@ const GameScreen = () => {
       setBoardHistory([Array(9).fill(null)])
       setStepNumber(0)
       setXIsNext(null)
+    } else {
+      AsyncStorage.setItem('gameStarted', 'true')
+      setGameStarted(true)
     }
-    setGameStarted(!gameStarted)
   }
 
   useEffect(() => {
