@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { AppContext } from '../navigation/AppProvider'
 
 import Board from '../components/Board'
 import { calculateWinner } from '../utils/helpers'
 
 const GameScreen = () => {
+  const { selectedPlayer } = useContext(AppContext)
+
   const [gameStarted, setGameStarted] = useState(false)
   const [boardHistory, setBoardHistory] = useState([Array(9).fill(null)])
   const [xIsNext, setXIsNext] = useState(null)
   const [stepNumber, setStepNumber] = useState(0)
 
   const winner = calculateWinner(boardHistory[stepNumber])
+
+  // check draw
+  const draw = boardHistory[stepNumber].every(square => square !== null)
 
   // computer move
   const handleComputerMove = () => {
@@ -27,7 +33,7 @@ const GameScreen = () => {
     }
 
     const randomIndex = Math.floor(Math.random() * emptySquares.length)
-    newBoard[emptySquares[randomIndex]] = 'X'
+    newBoard[emptySquares[randomIndex]] = selectedPlayer === 'X' ? 'O' : 'X'
     newStepNumber++
 
     setBoardHistory(prev => [...prev, newBoard])
@@ -44,7 +50,7 @@ const GameScreen = () => {
     if (winner || squares[i]) return
 
     // put an 'O' in the clicked square
-    squares[i] = 'O'
+    squares[i] = selectedPlayer
     setBoardHistory([...history, squares])
     setStepNumber(history.length)
     setXIsNext(!xIsNext)
@@ -62,7 +68,6 @@ const GameScreen = () => {
   useEffect(() => {
     // listen for computers turn 
     if (xIsNext && !winner) {
-      console.log('computers turn')
       handleComputerMove()
     }
   }, [xIsNext])
@@ -75,9 +80,9 @@ const GameScreen = () => {
         {gameStarted && (
           <View>
             {winner ? (
-              <Text style={styles.winner}>{winner === 'X' ? 'CPU Wins' : 'You Win'}</Text>
+              <Text style={styles.winner}>{winner === selectedPlayer ? 'You Win' : 'CPU Wins'}</Text>
             ) : (
-              <Text style={styles.winner}>{xIsNext ? "CPU'S turn" : 'Your turn'}</Text>
+              <Text style={styles.winner}>{draw ? "Oops, Draw!!!" : xIsNext ? "CPU'S turn" : 'Your turn'}</Text>
             )}
           </View>
         )}
